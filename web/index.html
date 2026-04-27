@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArtScii — ASCII Art Studio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Top bar ── -->
+  <header id="topbar">
+    <div id="logo">▓▒░ ArtScii ░▒▓</div>
+    <div id="llm-bar">
+      <span class="dot" id="llm-dot"></span>
+      <span id="llm-label">LLM: not loaded</span>
+      <button class="btn-xs" id="btn-load-llm">Load</button>
+    </div>
+  </header>
+
+  <!-- ── Body ── -->
+  <div id="body">
+
+    <!-- ── Sidebar ── -->
+    <aside id="sidebar">
+      <nav id="tabs">
+        <button class="tab active" data-tab="generator">Generator</button>
+        <button class="tab" data-tab="llm">LLM</button>
+        <button class="tab" data-tab="image">Image</button>
+        <button class="tab" data-tab="editor">Editor</button>
+      </nav>
+
+      <!-- Generator -->
+      <div id="tab-generator" class="panel active">
+        <label>Text</label>
+        <input type="text" id="gen-text" placeholder="Enter text…" autocomplete="off">
+
+        <label>Font <span class="hint" id="font-count"></span></label>
+        <input type="text" id="font-search" placeholder="Search fonts…" autocomplete="off">
+        <select id="font-select" size="7"></select>
+        <div class="row-btns">
+          <button class="btn-xs" id="btn-random-font">Random</button>
+          <button class="btn-xs" id="btn-preview-font">Preview</button>
+        </div>
+
+        <label>Border</label>
+        <select id="border-select">
+          <option value="none">None</option>
+          <option value="single">Single  ─ ┌┐└┘</option>
+          <option value="double">Double  ═ ╔╗╚╝</option>
+          <option value="rounded">Rounded ╭╮╰╯</option>
+          <option value="heavy">Heavy   ━ ┏┓┗┛</option>
+          <option value="ascii">ASCII   + - |</option>
+        </select>
+
+        <label>Width <span id="width-val">80</span></label>
+        <input type="range" id="width-range" min="40" max="200" value="80">
+
+        <label class="row-label">
+          <input type="checkbox" id="centered-check"> Center output
+        </label>
+
+        <button class="btn-primary" id="btn-generate">Generate ↵</button>
+      </div>
+
+      <!-- LLM -->
+      <div id="tab-llm" class="panel">
+        <label>Natural language prompt</label>
+        <textarea id="llm-prompt" rows="4"
+          placeholder="e.g. Create a banner for &#34;SB Tech&#34; with a double border"></textarea>
+        <p class="hint-text">Ctrl+Enter to generate</p>
+        <button class="btn-llm" id="btn-llm-gen">Generate with LLM</button>
+        <div class="info-box">
+          <b>Model:</b> Bonsai 1.7B (ternary)<br>
+          <b>Bits:</b> 1.58‑bit ternary · CPU only<br>
+          <b>Size:</b> ~400–700 MB (download once)<br><br>
+          The LLM interprets your prompt and routes to the ASCII engine for precise rendering. Freeform art (scenes, shapes) is generated directly by the model.
+        </div>
+      </div>
+
+      <!-- Image -->
+      <div id="tab-image" class="panel">
+        <label>Image</label>
+        <div id="drop-zone">
+          <span id="drop-label">Drop image or click to browse</span>
+          <input type="file" id="img-file" accept="image/*">
+        </div>
+        <div id="img-thumb"></div>
+
+        <label>Width <span id="img-width-val">80</span></label>
+        <input type="range" id="img-width-range" min="20" max="200" value="80">
+
+        <label>Character set</label>
+        <select id="charset-select">
+          <option value="standard">Standard  @%#*+=-:. </option>
+          <option value="blocks">Blocks    █▓▒░ </option>
+          <option value="minimal">Minimal   @:. </option>
+          <option value="detailed">Detailed  (dense)</option>
+        </select>
+
+        <label class="row-label">
+          <input type="checkbox" id="invert-check"> Invert
+        </label>
+
+        <button class="btn-primary" id="btn-img-gen">Convert Image</button>
+      </div>
+
+      <!-- Editor -->
+      <div id="tab-editor" class="panel">
+        <label>ANSI colour palette</label>
+        <div id="palette"></div>
+        <div id="sel-color-bar">
+          <span id="sel-color-box"></span>
+          <span id="sel-color-name">none selected</span>
+        </div>
+        <p class="hint-text">Select text in the preview, then apply a colour.</p>
+        <button class="btn-xs full" id="btn-apply-color">Apply colour to selection</button>
+        <button class="btn-xs full" id="btn-clear-colors">Clear all colours</button>
+
+        <label style="margin-top:12px">Add border to current art</label>
+        <select id="edit-border-select">
+          <option value="none">None</option>
+          <option value="single">Single</option>
+          <option value="double">Double</option>
+          <option value="rounded">Rounded</option>
+          <option value="heavy">Heavy</option>
+          <option value="ascii">ASCII</option>
+        </select>
+        <button class="btn-xs full" id="btn-add-border">Add border</button>
+      </div>
+    </aside>
+
+    <!-- ── Preview ── -->
+    <main id="preview-area">
+      <div id="preview-toolbar">
+        <span id="art-dims">0 × 0 chars</span>
+        <div id="toolbar-right">
+          <button class="btn-xs" id="btn-copy">Copy</button>
+          <button class="btn-xs" id="btn-export-txt">TXT</button>
+          <button class="btn-xs" id="btn-export-html">HTML</button>
+          <button class="btn-xs" id="btn-export-ans">ANS</button>
+        </div>
+      </div>
+
+      <div id="canvas-wrap">
+        <pre id="canvas" contenteditable="true" spellcheck="false">▓▒░ ArtScii ASCII Art Studio ░▒▓
+
+← Pick a mode from the sidebar and generate some art.
+
+  Generator  →  text to ASCII via 900+ pyfiglet fonts
+  LLM        →  natural language via BitNet b1.58 2B-4T
+  Image      →  drag an image to convert to ASCII
+  Editor     →  select text and apply ANSI colours
+</pre>
+      </div>
+
+      <div id="statusbar">
+        <span id="status-msg">Ready</span>
+        <span id="cursor-info"></span>
+      </div>
+    </main>
+
+  </div><!-- /body -->
+</div><!-- /app -->
+
+<script src="app.js"></script>
+</body>
+</html>
